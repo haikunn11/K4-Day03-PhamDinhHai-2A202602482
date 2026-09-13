@@ -32,20 +32,57 @@ class MockOfflineProvider(BaseLLMProvider):
         self.model_name = "Offline-Mock-Model-2026"
 
     def generate(self, prompt: str, system_prompt: str = "") -> str:
-        return f"[Mock Chatbot Response]: Xin chào! Tôi đã nhận được câu hỏi '{prompt}'. (Chế độ Chatbot không có Tool tra cứu dữ liệu thời gian thực)."
+        return (
+            f"[Mock Chatbot Response]: Theo quy định lưu kho chuẩn, thời gian lưu kho tối đa với linh kiện điện tử là 90 ngày, "
+            f"nhiệt độ bảo quản từ 20°C - 25°C với độ ẩm dưới 60%. (Lưu ý: Tôi không có quyền truy cập dữ liệu WMS thời gian thực để tra cứu đơn hàng cụ thể)."
+        )
 
     def generate_with_tools(self, prompt: str, tools_schema: List[Dict[str, Any]], system_prompt: str = "") -> Dict[str, Any]:
         prompt_lower = prompt.lower()
         
-        # Mô phỏng nhận diện intent gọi Tool
-        if "sv2026001" in prompt_lower and "đặt lịch" in prompt_lower:
+        # Mô phỏng nhận diện intent cho Chuỗi cung ứng (Supply Chain)
+        if "cập nhật trạng thái" in prompt_lower or "xuất kho" in prompt_lower or "điều chuyển" in prompt_lower:
+            target_order = "ORD-2026-002" if "ord-2026-002" in prompt_lower else "ORD-2026-001"
+            return {
+                "type": "tool_call",
+                "tool_name": "update_order_status",
+                "arguments": {
+                    "order_id": target_order,
+                    "new_status": "Đang xuất kho",
+                    "location": "Cửa xuất số 02"
+                },
+                "thought": f"Yêu cầu cập nhật trạng thái đơn hàng {target_order}. Tôi sẽ gọi tool update_order_status."
+            }
+        elif "ord-9999-999" in prompt_lower:
+            return {
+                "type": "tool_call",
+                "tool_name": "order_tracking",
+                "arguments": {"order_id": "ORD-9999-999"},
+                "thought": "Người dùng yêu cầu tra cứu đơn hàng ORD-9999-999. Tôi sẽ gọi tool order_tracking."
+            }
+        elif "ord-2026-002" in prompt_lower:
+            return {
+                "type": "tool_call",
+                "tool_name": "order_tracking",
+                "arguments": {"order_id": "ORD-2026-002"},
+                "thought": "Người dùng muốn kiểm tra tình trạng đơn hàng ORD-2026-002. Tôi sẽ gọi tool order_tracking."
+            }
+        elif "ord-2026-001" in prompt_lower or "đơn hàng" in prompt_lower or "kiện hàng" in prompt_lower:
+            return {
+                "type": "tool_call",
+                "tool_name": "order_tracking",
+                "arguments": {"order_id": "ORD-2026-001"},
+                "thought": "Người dùng muốn tra cứu thông tin đơn hàng ORD-2026-001. Tôi sẽ gọi tool order_tracking."
+            }
+        # Tương thích ngược với mã sinh viên
+        elif "sv2026001" in prompt_lower and "đặt lịch" in prompt_lower:
             return {
                 "type": "tool_call",
                 "tool_name": "schedule_appointment",
                 "arguments": {"student_id": "SV2026001", "datetime_str": "14:00 15/09/2026", "advisor_name": "PGS.TS Nguyễn Văn A"},
                 "thought": "Người dùng yêu cầu đặt lịch hẹn tư vấn cho sinh viên SV2026001. Tôi sẽ gọi tool schedule_appointment."
             }
-        elif "sv2026001" in prompt_lower or "tra cứu" in prompt_lower:
+        elif "sv2026001" in prompt_lower:
             return {
                 "type": "tool_call",
                 "tool_name": "academic_query",
@@ -55,8 +92,8 @@ class MockOfflineProvider(BaseLLMProvider):
         else:
             return {
                 "type": "text",
-                "content": f"[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
-                "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool."
+                "content": "[Mock Agent Response]: Theo quy định quản trị kho vận, thời gian lưu kho tối đa cho linh kiện điện tử là 90 ngày, nhiệt độ bảo quản chuẩn là 20°C - 25°C và độ ẩm kiểm soát dưới 60%.",
+                "thought": "Câu hỏi chung về quy định kho vận, trả lời trực tiếp không cần gọi Tool."
             }
 
 

@@ -1,0 +1,37 @@
+[
+  {
+    "id": "TC01",
+    "type": "direct_query",
+    "question": "Chào bạn, hãy cho tôi biết quy định chung về thời gian lưu kho tối đa và nhiệt độ bảo quản linh kiện điện tử tại tổng kho.",
+    "expected_behavior": "Chatbot trả lời trực tiếp từ System Prompt/kiến thức quy định kho vận, không cần gọi bất kỳ Tool nào.",
+    "complexity": "Low"
+  },
+  {
+    "id": "TC02",
+    "type": "single_tool_query",
+    "question": "Hãy tra cứu thông tin chi tiết và vị trí lưu kho của đơn hàng ORD-2026-001.",
+    "expected_behavior": "Agent nhận diện nhu cầu tra cứu đơn hàng, tự động phát sinh Tool Call 'order_tracking' với mã đơn ORD-2026-001.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC03",
+    "type": "order_status_update",
+    "question": "Hãy cập nhật trạng thái đơn hàng ORD-2026-001 thành 'Đang xuất kho' và điều chuyển tới Cửa xuất số 02.",
+    "expected_behavior": "Agent tự động phát sinh Tool Call 'update_order_status' với mã đơn ORD-2026-001, trạng thái mới và vị trí chỉ định.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC04",
+    "type": "multi_step_reasoning",
+    "question": "Kiểm tra xem đơn hàng ORD-2026-002 hiện đang ở vị trí kho nào và đã đóng gói chưa, nếu đã sẵn sàng thì cập nhật trạng thái xuất kho bàn giao vận chuyển giúp tôi.",
+    "expected_behavior": "Agent thực hiện chuỗi suy luận ReAct: Tra cứu trạng thái đơn hàng ORD-2026-002 trước, sau đó tiến hành cập nhật trạng thái sang xuất kho.",
+    "complexity": "High"
+  },
+  {
+    "id": "TC05",
+    "type": "edge_case_handling",
+    "question": "Hãy kiểm tra vị trí kho và thông tin của mã đơn hàng ORD-9999-999.",
+    "expected_behavior": "Agent nhận kết quả NOT_FOUND từ Tool và đưa ra phản hồi lịch sự, chính xác thông báo không tìm thấy đơn hàng, tuyệt đối không bịa đặt.",
+    "complexity": "Medium"
+  }
+]

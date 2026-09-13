@@ -121,17 +121,27 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
                 if obs_data.get("status") == "SUCCESS":
                     if "data" in obs_data:
                         d = obs_data["data"]
-                        final_answer = (
-                            f"Kết quả tra cứu cho sinh viên {obs_data.get('student_id', '')} ({d.get('full_name', '')}): "
-                            f"Lớp {d.get('class', '')}, GPA: {d.get('gpa', '')}, Email: {d.get('email', '')}, "
-                            f"Trạng thái: {d.get('status', '')}, Cố vấn: {d.get('advisor', '')}."
-                        )
+                        if "order_id" in d or "item_name" in d:
+                            final_answer = (
+                                f"Kết quả tra cứu đơn hàng {d.get('order_id', obs_data.get('order_id', ''))} ({d.get('item_name', '')}): "
+                                f"Khách hàng: {d.get('customer', '')}, Số lượng: {d.get('quantity', '')}, "
+                                f"Vị trí lưu kho: {d.get('warehouse_location', '')}, Trạng thái: {d.get('status', '')}, "
+                                f"Người phụ trách: {d.get('manager', '')}, Ghi chú: {d.get('notes', 'Không có')}."
+                            )
+                        elif "full_name" in d:
+                            final_answer = (
+                                f"Kết quả tra cứu cho sinh viên {obs_data.get('student_id', '')} ({d.get('full_name', '')}): "
+                                f"Lớp {d.get('class', '')}, GPA: {d.get('gpa', '')}, Email: {d.get('email', '')}, "
+                                f"Trạng thái: {d.get('status', '')}, Cố vấn: {d.get('advisor', '')}."
+                            )
+                        else:
+                            final_answer = f"Kết quả chi tiết từ hệ thống: {json.dumps(d, ensure_ascii=False)}"
                     elif "message" in obs_data:
                         final_answer = obs_data["message"]
                     else:
                         final_answer = f"Đã hoàn tất xử lý qua MCP Server: {json.dumps(obs_data, ensure_ascii=False)}"
                 elif obs_data.get("status") == "NOT_FOUND":
-                    final_answer = obs_data.get("message", "Không tìm thấy thông tin sinh viên yêu cầu.")
+                    final_answer = obs_data.get("message", "Không tìm thấy thông tin yêu cầu trong hệ thống.")
                 else:
                     final_answer = f"Phản hồi từ công cụ: {json.dumps(obs_data, ensure_ascii=False)}"
             

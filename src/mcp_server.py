@@ -39,7 +39,18 @@ class MCPAcademicServer:
         # 3. Đóng gói phản hồi và trả về Dict theo đúng chuẩn giao thức MCP JSON-RPC 2.0:
         #    - Các trường bắt buộc: "jsonrpc": "2.0", "server": self.server_name, "tool": tool_name, "result": content
         # --------------------------------------------------------------------------
-        return {}
+        raw_result = dispatch_tool_call(tool_name, arguments)
+        try:
+            content = json.loads(raw_result)
+        except Exception:
+            content = {"raw": raw_result}
+            
+        return {
+            "jsonrpc": "2.0",
+            "server": self.server_name,
+            "tool": tool_name,
+            "result": content
+        }
 
 
 if __name__ == "__main__":
@@ -66,3 +77,7 @@ if __name__ == "__main__":
     else:
         print(f"✅ [TODO 2.1]: Test dispatch tool 'academic_query' thành công:")
         print(f"   Phản hồi JSON-RPC: {json.dumps(test_result, ensure_ascii=False)}")
+        
+    test_order = server.call_tool("order_tracking", {"order_id": "ORD-2026-001"})
+    print(f"✅ [TODO 2.1]: Test dispatch tool 'order_tracking' thành công:")
+    print(f"   Phản hồi JSON-RPC: {json.dumps(test_order, ensure_ascii=False)}")
